@@ -13,21 +13,25 @@ INSERT INTO marital_status_lookup (status_name) VALUES ('Married') ON CONFLICT (
 INSERT INTO marital_status_lookup (status_name) VALUES ('Divorced') ON CONFLICT (status_name) DO NOTHING;
 INSERT INTO marital_status_lookup (status_name) VALUES ('Widowed') ON CONFLICT (status_name) DO NOTHING;
 
-INSERT INTO occupation_lookup (occupation_name, category) VALUES ('Software Engineer', 'IT') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name, category) VALUES ('Doctor', 'Healthcare') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name, category) VALUES ('Teacher', 'Education') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name, category) VALUES ('Business Owner', 'Business') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Software Engineer') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Doctor') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Teacher') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Business Owner') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Business Analyst') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Government Employee') ON CONFLICT (occupation_name) DO NOTHING;
+INSERT INTO occupation_lookup (occupation_name) VALUES ('Others') ON CONFLICT (occupation_name) DO NOTHING;
 
-INSERT INTO loan_status_lookup (status_name, description) VALUES ('DRAFT', 'Application in draft state') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name, description) VALUES ('SUBMITTED', 'Application submitted for review') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name, description) VALUES ('UNDER_REVIEW', 'Application under maker review') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name, description) VALUES ('PENDING_CHECKER_APPROVAL', 'Approved by maker, pending checker approval') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name, description) VALUES ('APPROVED_BY_CHECKER', 'Verified and approved by checker') ON CONFLICT (status_name) DO NOTHING;
+INSERT INTO loan_status_lookup (status_name) VALUES ('DRAFT') ON CONFLICT (status_name) DO NOTHING;
+INSERT INTO loan_status_lookup (status_name) VALUES ('SUBMITTED') ON CONFLICT (status_name) DO NOTHING;
+INSERT INTO loan_status_lookup (status_name) VALUES ('UNDER_REVIEW') ON CONFLICT (status_name) DO NOTHING;
+INSERT INTO loan_status_lookup (status_name) VALUES ('PENDING_CHECKER_APPROVAL') ON CONFLICT (status_name) DO NOTHING;
+INSERT INTO loan_status_lookup (status_name) VALUES ('APPROVED_BY_CHECKER') ON CONFLICT (status_name) DO NOTHING;
 
-INSERT INTO document_types (name, description, is_required) VALUES ('Aadhar Card', 'Government ID proof', true) ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name, description, is_required) VALUES ('PAN Card', 'Income tax document', true) ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name, description, is_required) VALUES ('Salary Slip', 'Income proof', true) ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name, description, is_required) VALUES ('Bank Statement', 'Financial history', true) ON CONFLICT (name) DO NOTHING;
+INSERT INTO document_types (name) VALUES ('Aadhar Card') ON CONFLICT (name) DO NOTHING;
+INSERT INTO document_types (name) VALUES ('PAN Card') ON CONFLICT (name) DO NOTHING;
+INSERT INTO document_types (name) VALUES ('Salary Slip') ON CONFLICT (name) DO NOTHING;
+INSERT INTO document_types (name) VALUES ('Bank Statement') ON CONFLICT (name) DO NOTHING;
+INSERT INTO document_types (name) VALUES ('Property Documents') ON CONFLICT (name) DO NOTHING;
 
 -- Insert test users (password is 'password123' encoded with BCrypt)
 INSERT INTO users (username, password_hash, is_new_user, activation_at, updated_at) 
@@ -43,24 +47,15 @@ VALUES ('divya@email.com', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKP
 ON CONFLICT (username) DO NOTHING;
 
 -- Insert test bank members
-INSERT INTO members (username, password_hash, last_login, is_active) 
-VALUES ('kaushik', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', NOW(), true) 
-ON CONFLICT (username) DO NOTHING;
-
-INSERT INTO members (username, password_hash, last_login, is_active) 
-VALUES ('nipun', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', NOW(), true) 
-ON CONFLICT (username) DO NOTHING;
-
--- Link members to roles (assuming we have the IDs)
-INSERT INTO members (member_id, username, password_hash, role_id, last_login, is_active)
-SELECT 1, 'kaushik', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', r.id, NOW(), true
+INSERT INTO members (username, password_hash, role_id) 
+SELECT 'kaushik', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', r.id
 FROM roles r WHERE r.role_name = 'MAKER'
-ON CONFLICT (username) DO UPDATE SET role_id = EXCLUDED.role_id;
+ON CONFLICT (username) DO NOTHING;
 
-INSERT INTO members (member_id, username, password_hash, role_id, last_login, is_active)
-SELECT 2, 'nipun', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', r.id, NOW(), true
+INSERT INTO members (username, password_hash, role_id) 
+SELECT 'nipun', '$2a$10$QsDSKZkDzyP6r1mNWd14F.31lrQQkbdibIwCBpM3LyKKPE7nAXnye', r.id
 FROM roles r WHERE r.role_name = 'CHECKER'
-ON CONFLICT (username) DO UPDATE SET role_id = EXCLUDED.role_id;
+ON CONFLICT (username) DO NOTHING;
 
 -- Insert personal details for users
 INSERT INTO personal_details (customer_id, date_of_birth, aadhar_number, pan_number, father_name, mother_name, address, city, state, pincode, gender_id, marital_status_id)
@@ -193,96 +188,96 @@ FROM loan_applications la, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'divya@email.com'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
--- Insert document records for the users
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'vinay_aadhar_card.pdf', '/uploads/documents/vinay_aadhar_card.pdf', 2048576, '2025-08-15 10:35:00', true, m.member_id, '2025-08-16 11:20:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
+-- Insert loan document records for the users
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/vinay_aadhar_card.pdf', true
+FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'vinay@email.com' 
-AND dt.type_name = 'Aadhar Card' AND m.username = 'kaushik'
+AND dt.name = 'Aadhar Card'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'vinay_pan_card.pdf', '/uploads/documents/vinay_pan_card.pdf', 1024768, '2025-08-15 10:36:00', true, m.member_id, '2025-08-16 11:22:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/vinay_pan_card.pdf', true
+FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'vinay@email.com' 
-AND dt.type_name = 'PAN Card' AND m.username = 'kaushik'
+AND dt.name = 'PAN Card'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'vinay_salary_slip.pdf', '/uploads/documents/vinay_salary_slip.pdf', 512384, '2025-08-15 10:37:00', true, m.member_id, '2025-08-16 11:25:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/vinay_salary_slip.pdf', true
+FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'vinay@email.com' 
-AND dt.type_name = 'Salary Slip' AND m.username = 'kaushik'
+AND dt.name = 'Salary Slip'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'vinay_bank_statement.pdf', '/uploads/documents/vinay_bank_statement.pdf', 3072896, '2025-08-15 10:38:00', true, m.member_id, '2025-08-16 11:30:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/vinay_bank_statement.pdf', true
+FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'vinay@email.com' 
-AND dt.type_name = 'Bank Statement' AND m.username = 'kaushik'
+AND dt.name = 'Bank Statement'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
 -- Documents for Shruti
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'shruti_aadhar_card.pdf', '/uploads/documents/shruti_aadhar_card.pdf', 1875456, '2025-08-20 14:20:00', true, m.member_id, '2025-08-21 16:10:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
-WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
-AND dt.type_name = 'Aadhar Card' AND m.username = 'kaushik'
-ON CONFLICT (application_id, document_type_id) DO NOTHING;
-
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'shruti_pan_card.pdf', '/uploads/documents/shruti_pan_card.pdf', 987654, '2025-08-20 14:21:00', true, m.member_id, '2025-08-21 16:12:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
-WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
-AND dt.type_name = 'PAN Card' AND m.username = 'kaushik'
-ON CONFLICT (application_id, document_type_id) DO NOTHING;
-
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'shruti_salary_slip.pdf', '/uploads/documents/shruti_salary_slip.pdf', 654321, '2025-08-20 14:22:00', true, m.member_id, '2025-08-21 16:15:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
-WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
-AND dt.type_name = 'Salary Slip' AND m.username = 'kaushik'
-ON CONFLICT (application_id, document_type_id) DO NOTHING;
-
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'shruti_bank_statement.pdf', '/uploads/documents/shruti_bank_statement.pdf', 4096512, '2025-08-20 14:23:00', true, m.member_id, '2025-08-21 16:18:00', true, false
-FROM loan_applications la, document_types dt, members m, users u
-WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
-AND dt.type_name = 'Bank Statement' AND m.username = 'kaushik'
-ON CONFLICT (application_id, document_type_id) DO NOTHING;
-
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'shruti_property_documents.pdf', '/uploads/documents/shruti_property_documents.pdf', 8192768, '2025-08-20 14:25:00', false, NULL, NULL, false, false
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/shruti_aadhar_card.pdf', true
 FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
-AND dt.type_name = 'Property Documents'
+AND dt.name = 'Aadhar Card'
+ON CONFLICT (application_id, document_type_id) DO NOTHING;
+
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/shruti_pan_card.pdf', true
+FROM loan_applications la, document_types dt, users u
+WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
+AND dt.name = 'PAN Card'
+ON CONFLICT (application_id, document_type_id) DO NOTHING;
+
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/shruti_salary_slip.pdf', true
+FROM loan_applications la, document_types dt, users u
+WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
+AND dt.name = 'Salary Slip'
+ON CONFLICT (application_id, document_type_id) DO NOTHING;
+
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/shruti_bank_statement.pdf', true
+FROM loan_applications la, document_types dt, users u
+WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
+AND dt.name = 'Bank Statement'
+ON CONFLICT (application_id, document_type_id) DO NOTHING;
+
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/shruti_property_documents.pdf', false
+FROM loan_applications la, document_types dt, users u
+WHERE la.customer_id = u.customer_id AND u.username = 'shruti@email.com' 
+AND dt.name = 'Property Documents'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
 -- Documents for Divya
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'divya_aadhar_card.pdf', '/uploads/documents/divya_aadhar_card.pdf', 1536512, '2025-08-25 16:50:00', false, NULL, NULL, false, false
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/divya_aadhar_card.pdf', false
 FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'divya@email.com' 
-AND dt.type_name = 'Aadhar Card'
+AND dt.name = 'Aadhar Card'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'divya_pan_card.pdf', '/uploads/documents/divya_pan_card.pdf', 768432, '2025-08-25 16:51:00', false, NULL, NULL, false, false
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/divya_pan_card.pdf', false
 FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'divya@email.com' 
-AND dt.type_name = 'PAN Card'
+AND dt.name = 'PAN Card'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'divya_salary_slip.pdf', '/uploads/documents/divya_salary_slip.pdf', 445632, '2025-08-25 16:52:00', false, NULL, NULL, false, false
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/divya_salary_slip.pdf', false
 FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'divya@email.com' 
-AND dt.type_name = 'Salary Slip'
+AND dt.name = 'Salary Slip'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
 
-INSERT INTO documents (application_id, document_type_id, file_name, file_path, file_size, uploaded_at, is_verified, verified_by, verified_at, maker_approved, checker_approved)
-SELECT la.application_id, dt.id, 'divya_bank_statement.pdf', '/uploads/documents/divya_bank_statement.pdf', 2756864, '2025-08-25 16:53:00', false, NULL, NULL, false, false
+INSERT INTO loan_documents (application_id, document_type_id, file_path, is_verified)
+SELECT la.application_id, dt.document_type_id, '/uploads/documents/divya_bank_statement.pdf', false
 FROM loan_applications la, document_types dt, users u
 WHERE la.customer_id = u.customer_id AND u.username = 'divya@email.com' 
-AND dt.type_name = 'Bank Statement'
+AND dt.name = 'Bank Statement'
 ON CONFLICT (application_id, document_type_id) DO NOTHING;
