@@ -1,37 +1,4 @@
--- Insert test roles
-INSERT INTO roles (role_name) VALUES ('CUSTOMER') ON CONFLICT (role_name) DO NOTHING;
-INSERT INTO roles (role_name) VALUES ('MAKER') ON CONFLICT (role_name) DO NOTHING;
-INSERT INTO roles (role_name) VALUES ('CHECKER') ON CONFLICT (role_name) DO NOTHING;
-
--- Insert lookup data
-INSERT INTO gender_lookup (gender_name) VALUES ('Male') ON CONFLICT (gender_name) DO NOTHING;
-INSERT INTO gender_lookup (gender_name) VALUES ('Female') ON CONFLICT (gender_name) DO NOTHING;
-INSERT INTO gender_lookup (gender_name) VALUES ('Other') ON CONFLICT (gender_name) DO NOTHING;
-
-INSERT INTO marital_status_lookup (status_name) VALUES ('Single') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO marital_status_lookup (status_name) VALUES ('Married') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO marital_status_lookup (status_name) VALUES ('Divorced') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO marital_status_lookup (status_name) VALUES ('Widowed') ON CONFLICT (status_name) DO NOTHING;
-
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Software Engineer') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Doctor') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Teacher') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Business Owner') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Business Analyst') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Government Employee') ON CONFLICT (occupation_name) DO NOTHING;
-INSERT INTO occupation_lookup (occupation_name) VALUES ('Others') ON CONFLICT (occupation_name) DO NOTHING;
-
-INSERT INTO loan_status_lookup (status_name) VALUES ('DRAFT') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name) VALUES ('SUBMITTED') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name) VALUES ('UNDER_REVIEW') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name) VALUES ('PENDING_CHECKER_APPROVAL') ON CONFLICT (status_name) DO NOTHING;
-INSERT INTO loan_status_lookup (status_name) VALUES ('APPROVED_BY_CHECKER') ON CONFLICT (status_name) DO NOTHING;
-
-INSERT INTO document_types (name) VALUES ('Aadhar Card') ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name) VALUES ('PAN Card') ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name) VALUES ('Salary Slip') ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name) VALUES ('Bank Statement') ON CONFLICT (name) DO NOTHING;
-INSERT INTO document_types (name) VALUES ('Property Documents') ON CONFLICT (name) DO NOTHING;
+-- Test data initialization (lookup tables handled by DataInitializationService)
 
 -- Insert test users (password is 'password123' encoded with BCrypt)
 INSERT INTO users (username, password_hash, is_new_user, activation_at, updated_at) 
@@ -100,30 +67,30 @@ INSERT INTO loan_applications (user_id, status_id, created_at, updated_at)
 SELECT u.customer_id, s.id, '2025-08-15 10:30:00', NOW()
 FROM users u, loan_status_lookup s
 WHERE u.username = 'vinay@email.com' AND s.status_name = 'PENDING_CHECKER_APPROVAL'
-ON CONFLICT (application_id) DO NOTHING;
+ON CONFLICT (user_id, created_at) DO NOTHING;
 
 INSERT INTO loan_applications (user_id, status_id, created_at, updated_at)
 SELECT u.customer_id, s.id, '2025-08-20 14:15:00', NOW()
 FROM users u, loan_status_lookup s
 WHERE u.username = 'shruti@email.com' AND s.status_name = 'UNDER_REVIEW'
-ON CONFLICT (application_id) DO NOTHING;
+ON CONFLICT (user_id, created_at) DO NOTHING;
 
 INSERT INTO loan_applications (user_id, status_id, created_at, updated_at)
 SELECT u.customer_id, s.id, '2025-08-25 16:45:00', NOW()
 FROM users u, loan_status_lookup s
 WHERE u.username = 'divya@email.com' AND s.status_name = 'SUBMITTED'
-ON CONFLICT (application_id) DO NOTHING;
+ON CONFLICT (user_id, created_at) DO NOTHING;
 
 -- Insert loan details
 INSERT INTO loan_details (application_id, loan_type, amount, tenure_months, interest_rate, maker_comments, maker_id, maker_approved_at, updated_at)
 SELECT la.application_id, 'Personal Loan', 500000.00, 36, 12.5, 'All documents verified. Good credit profile.', m.member_id, '2025-08-16 11:45:00', NOW()
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'vinay@email.com' AND m.username = 'kaushik'
 ON CONFLICT (application_id) DO NOTHING;
 
 INSERT INTO loan_details (application_id, loan_type, amount, tenure_months, interest_rate, maker_comments, checker_comments, maker_id, checker_id, maker_approved_at, updated_at)
 SELECT la.application_id, 'Home Loan', 2500000.00, 240, 8.75, 'Excellent income profile. Property documents pending verification.', 'Under review for final approval.', m1.member_id, m2.member_id, '2025-08-21 16:30:00', NOW()
-FROM loan_applications la, members m1, members m2, users u
+FROM loan_applications la, users u, members m1, members m2
 WHERE la.user_id = u.customer_id AND u.username = 'shruti@email.com' AND m1.username = 'kaushik' AND m2.username = 'nipun'
 ON CONFLICT (application_id) DO NOTHING;
 
@@ -138,48 +105,48 @@ INSERT INTO nominee_details (application_id, nominee_name, relationship, nominee
 SELECT la.application_id, 'Priya Kumar', 'Sister', '789 MG Road, Indiranagar, Bangalore', '+91-9876543210', 'KLMNO9012P', '1992-11-08', NOW()
 FROM loan_applications la, users u
 WHERE la.user_id = u.customer_id AND u.username = 'vinay@email.com'
-ON CONFLICT (nominee_id) DO NOTHING;
+ON CONFLICT (application_id) DO NOTHING;
 
 INSERT INTO nominee_details (application_id, nominee_name, relationship, nominee_address, nominee_phone, nominee_pan, nominee_dob, updated_at)
 SELECT la.application_id, 'Amit Sharma', 'Husband', '456 Green Avenue, Koramangala, Bangalore', '+91-9123456789', 'PQRST3456U', '1990-12-10', NOW()
 FROM loan_applications la, users u
 WHERE la.user_id = u.customer_id AND u.username = 'shruti@email.com'
-ON CONFLICT (nominee_id) DO NOTHING;
+ON CONFLICT (application_id) DO NOTHING;
 
 INSERT INTO nominee_details (application_id, nominee_name, relationship, nominee_address, nominee_phone, nominee_pan, nominee_dob, updated_at)
 SELECT la.application_id, 'Rakesh Patel', 'Father', '789 Brigade Road, MG Road, Bangalore', '+91-9876543210', 'UVWXY7890Z', '1968-05-15', NOW()
 FROM loan_applications la, users u
 WHERE la.user_id = u.customer_id AND u.username = 'divya@email.com'
-ON CONFLICT (nominee_id) DO NOTHING;
+ON CONFLICT (application_id) DO NOTHING;
 
 -- Insert application status history
 INSERT INTO application_status_history (application_id, member_id, previous_status, new_status, comments, changed_at)
 SELECT la.application_id, m.member_id, 'DRAFT', 'SUBMITTED', 'Application submitted by customer', '2025-08-15 10:30:00'
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'vinay@email.com' AND m.username = 'kaushik'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
 INSERT INTO application_status_history (application_id, member_id, previous_status, new_status, comments, changed_at)
 SELECT la.application_id, m.member_id, 'SUBMITTED', 'UNDER_REVIEW', 'Moved to maker review', '2025-08-16 09:15:00'
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'vinay@email.com' AND m.username = 'kaushik'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
 INSERT INTO application_status_history (application_id, member_id, previous_status, new_status, comments, changed_at)
 SELECT la.application_id, m.member_id, 'UNDER_REVIEW', 'PENDING_CHECKER_APPROVAL', 'Approved by maker, ready for checker review', '2025-08-16 11:45:00'
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'vinay@email.com' AND m.username = 'kaushik'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
 INSERT INTO application_status_history (application_id, member_id, previous_status, new_status, comments, changed_at)
 SELECT la.application_id, m.member_id, 'DRAFT', 'SUBMITTED', 'Application submitted by customer', '2025-08-20 14:15:00'
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'shruti@email.com' AND m.username = 'kaushik'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
 INSERT INTO application_status_history (application_id, member_id, previous_status, new_status, comments, changed_at)
 SELECT la.application_id, m.member_id, 'SUBMITTED', 'UNDER_REVIEW', 'Moved to checker review', '2025-08-21 10:45:00'
-FROM loan_applications la, members m, users u
+FROM loan_applications la, users u, members m
 WHERE la.user_id = u.customer_id AND u.username = 'shruti@email.com' AND m.username = 'nipun'
 ON CONFLICT (application_id, changed_at) DO NOTHING;
 
